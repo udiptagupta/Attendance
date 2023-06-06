@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration>
+<configuration scan="true" scanPeriod="5 seconds">
+	<property resource="application.properties" />
+	
+	<appender name="rollingFileAppender"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${logging.file.path}/{logging.file.name}</file>
+		<rollingPolicy
+			class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+			<fileNamePattern>${logging.file.path}/attendance.%d{yyyy-MM-dd-mm}.%i.log.zip</fileNamePattern>
+			<maxFileSize>50MB</maxFileSize>
+			<maxHistory>30</maxHistory>
+		</rollingPolicy>
+		<encoder>
+			<pattern>%d{yyyy-MM-dd HH:mm:ss} %p %m%n</pattern>
+		</encoder>
+	</appender>
+	<appender name="consoleAppender"
+		class="ch.qos.logback.core.ConsoleAppender">
+		<encoder
+			class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+			<layout class="ch.qos.logback.classic.PatternLayout">
+				<pattern>%d{yyyy-MM-dd HH:mm:ss} %p %m%n</pattern>
+			</layout>
+		</encoder>
+	</appender>
+
+	<root level="INFO">
+		<appender-ref ref="rollingFileAppender" />
+		<appender-ref ref="consoleAppender" />
+	</root>
+
+</configuration>

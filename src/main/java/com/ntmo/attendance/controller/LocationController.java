@@ -27,7 +27,7 @@ public class LocationController {
 	
 	@RequestMapping("/locations")
 	public List<Location> getLocations() {
-		log.debug("LocationController:get");
+		log.debug("LocationController:getLocations");
 		return locationService.get();
 	}
 	
