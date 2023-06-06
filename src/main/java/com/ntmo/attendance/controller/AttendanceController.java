@@ -20,6 +20,9 @@ import com.ntmo.attendance.entity.EmployeeAttendance;
 import com.ntmo.attendance.repos.AttendanceRepository;
 import com.ntmo.attendance.service.EmployeeService;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @RestController
 public class AttendanceController {
 
@@ -31,6 +34,7 @@ public class AttendanceController {
 	
 	@PostMapping("/attendance")
 	public Attendance save(@RequestBody Attendance att) {
+		log.debug("AttendanceController:save - " + att);
 		Attendance newAtt = aRep.save(att);
 		return newAtt;
 	}
@@ -39,6 +43,7 @@ public class AttendanceController {
 	@SuppressWarnings("deprecation")
 	@PostMapping("/attendance/{id}")
 	public Attendance save(@PathVariable int id) {
+		log.debug("AttendanceController:save");
 		Attendance att = new Attendance();
 		att.setEmployeeId(id);
 		Date cDate = new Date();
@@ -53,6 +58,7 @@ public class AttendanceController {
 	// Find attendance details of employee for current month
 	@GetMapping("/attendance/{id}")
 	public EmployeeAttendance getEmployeeAttendance(@PathVariable int id) {
+		log.debug("AttendanceController:getEmployeeAttendance - id=" + id);
 		// return attendanceService.getEmployeeAttendance(id);
 		Date startDate = Date.from(LocalDate.now().withDayOfMonth(1).atStartOfDay().toInstant(ZoneOffset.UTC));
 		// Date startDate = Date.from(LocalDate.now().minusMonths(1).withDayOfMonth(1).atStartOfDay().toInstant(ZoneOffset.UTC));		// For previous month
@@ -73,6 +79,7 @@ public class AttendanceController {
 	
 	@GetMapping("/attendanceManagedBy/{id}")
 	public List<EmployeeAttendance> getAttendanceManagedBy(@PathVariable int id) {
+		log.debug("AttendanceController:getAttendanceManagedBy - id=" + id);
 		List<EmployeeAttendance> eaList = new ArrayList<EmployeeAttendance>();
 		List<Employee> empList = empService.getEmployee();
 		List<Employee> filteredList = empList

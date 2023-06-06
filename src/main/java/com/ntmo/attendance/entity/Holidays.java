@@ -42,5 +42,10 @@ public class Holidays {
 	public void setLocationId(int locationId) {
 		this.locationId = locationId;
 	}
+	@Override
+	public String toString() {
+		return "Holidays [id=" + id + ", holidayDate=" + holidayDate + ", holidayName=" + holidayName + ", locationId="
+				+ locationId + "]";
+	}
 	
 }

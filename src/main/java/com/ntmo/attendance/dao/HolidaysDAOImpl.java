@@ -7,9 +7,11 @@ import org.hibernate.query.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import jakarta.persistence.EntityManager;
+import lombok.extern.slf4j.Slf4j;
 
 import com.ntmo.attendance.entity.Holidays;
 
+@Slf4j
 @Repository
 public class HolidaysDAOImpl implements HolidaysDAO {
 
@@ -37,6 +39,7 @@ public class HolidaysDAOImpl implements HolidaysDAO {
 		Session currentSession = entityManager.unwrap(Session.class);
 		Holidays day = currentSession.get(Holidays.class, id);
 		if(day == null) {
+			log.error("HolidaysDAOImpl:delete " + id + " Not Found");
 			throw new RuntimeException("Holiday with id " + id + " not found.");
 		}
 	}

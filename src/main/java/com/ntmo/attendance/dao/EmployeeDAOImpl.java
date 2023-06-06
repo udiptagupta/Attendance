@@ -10,7 +10,9 @@ import org.springframework.stereotype.Repository;
 import com.ntmo.attendance.entity.Employee;
 
 import jakarta.persistence.EntityManager;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Repository
 public class EmployeeDAOImpl implements EmployeeDAO {
 	
@@ -44,6 +46,7 @@ public class EmployeeDAOImpl implements EmployeeDAO {
 		Session currentSession = entityManager.unwrap(Session.class);
 		Employee emp = currentSession.get(Employee.class, id);
 		if(emp == null) {
+			log.error("EmployeeDAOImpl:delete " + id + " Not Found");
 			throw new RuntimeException("Employee with id " + id + " not found.");
 		}
 		currentSession.remove(emp);

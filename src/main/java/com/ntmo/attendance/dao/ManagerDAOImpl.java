@@ -7,9 +7,10 @@ import org.hibernate.query.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import jakarta.persistence.EntityManager;
+import lombok.extern.slf4j.Slf4j;
 
 import com.ntmo.attendance.entity.Manager;
-
+@Slf4j
 @Repository
 public class ManagerDAOImpl implements ManagerDAO {
 	
@@ -43,6 +44,7 @@ public class ManagerDAOImpl implements ManagerDAO {
 		Session currentSession = entityManager.unwrap(Session.class);
 		Manager mgr = currentSession.get(Manager.class, id);
 		if(mgr == null) {
+			log.error("ManagerDAOImpl:delete " + id + " Not Found");
 			throw new RuntimeException("Manager with id " + id + " not found.");
 		}
 		currentSession.remove(mgr);

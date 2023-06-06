@@ -20,5 +20,9 @@ public class EmployeeAttendance {
 	public void setPresenceDate(List<Date> presenceDate) {
 		this.presenceDate = presenceDate;
 	}
+	@Override
+	public String toString() {
+		return "EmployeeAttendance [employeeId=" + employeeId + ", presenceDate=" + presenceDate + "]";
+	}
 
 }

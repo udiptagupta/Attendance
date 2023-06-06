@@ -17,6 +17,9 @@ import com.ntmo.attendance.entity.Manager;
 import com.ntmo.attendance.service.EmployeeService;
 import com.ntmo.attendance.service.ManagerService;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @RestController
 public class EmployeeController {
 	
@@ -28,33 +31,39 @@ public class EmployeeController {
 
 	@RequestMapping("/employees")
 	public List<Employee> getEmployees() {
+		log.debug("EmployeeController:getEmployees");
 		return empService.getEmployee();
 	}
 
 	
 	@PostMapping("/employee")
 	public Employee save(@RequestBody Employee emp) {
+		log.info("EmployeeController:save - " + emp);
 		return empService.save(emp);
 	}
 	
 	@GetMapping("/employee/{id}")
 	public Employee get(@PathVariable int id) {
+		log.debug("EmployeeController:get - " + id);
 		return empService.get(id);
 	}
 
 	@GetMapping("/findEmployee/{email}")
 	public Employee findEmployee(@PathVariable String email) {
+		log.debug("EmployeeController:findEmployee - " + email);
 		return empService.findEmployee(email);
 	}
 	
 	@DeleteMapping("/employee/{id}")
 	public String delete(@PathVariable int id) {
+		log.debug("EmployeeController:delete - " + id);
 		empService.delete(id);
 		return "Removed Employee record with id " + id + ".";
 	}
 	
 	@GetMapping("/employeesManagedBy/{id}")
 	public List<Employee> getManagedEmployees(@PathVariable int id) {
+		log.debug("EmployeeController:getManagedEmployees - " + id);
 		List<Employee> empList = empService.getEmployee();
 		List<Employee> filteredList = empList
 		.stream()
@@ -65,6 +74,7 @@ public class EmployeeController {
 	
 	@GetMapping("/isManager/{email}")
 	public Manager isManager(@PathVariable String email) {
+		log.debug("EmployeeController:isManager - " + email);
 		if(null == findEmployee(email)) {
 			return null;
 		}

@@ -15,6 +15,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ntmo.attendance.entity.Manager;
 import com.ntmo.attendance.service.ManagerService;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @RestController
 public class ManagerController {
 	
@@ -23,20 +26,24 @@ public class ManagerController {
 	
 	@RequestMapping("/managers")
 	public List<Manager> getManagers() {
+		log.debug("ManagerController:getManagers");
 		return managerService.get();
 	}
 
 	
 	@PostMapping("/manager")
 	public Manager save(@RequestBody Manager mgr) {
+		log.info("ManagerController:save" + mgr);
 		Manager newMgr = managerService.save(mgr);
 		return newMgr;
 	}
 	
 	@GetMapping("/manager/{id}")
 	public Manager get(@PathVariable int id) {
+		log.debug("ManagerController:get " + id);
 		Manager mgr = managerService.get(id);
 		if(mgr == null) {
+			log.error("ManagerController:get " + id + " - Not Found");
 			throw new RuntimeException("Manager with id " + id + " not found.");
 		}
 		return mgr;
@@ -44,6 +51,7 @@ public class ManagerController {
 	
 	@DeleteMapping("/manager/{id}")
 	public String delete(@PathVariable int id) {
+		log.debug("ManagerController:delete " + id);
 		managerService.delete(id);
 		return "Deleted Manager record with id " + id;
 	}

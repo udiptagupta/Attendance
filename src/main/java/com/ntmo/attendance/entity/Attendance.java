@@ -35,5 +35,8 @@ public class Attendance {
 	public void setPresenceDate(Date presenceDate) {
 		this.presenceDate = presenceDate;
 	}
-	
+	@Override
+	public String toString() {
+		return "Attendance [employeeId=" + employeeId + ", presenceDate=" + presenceDate + "]";
+	}
 }

@@ -10,7 +10,9 @@ import org.springframework.stereotype.Repository;
 import com.ntmo.attendance.entity.Location;
 
 import jakarta.persistence.EntityManager;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Repository
 public class LocationDAOImpl implements LocationDAO {
 
@@ -44,6 +46,7 @@ public class LocationDAOImpl implements LocationDAO {
 		Session currentSession = entityManager.unwrap(Session.class);
 		Location loc = currentSession.get(Location.class, id);
 		if(loc == null) {
+			log.error("LocationDAOImpl:delete " + id + " Not Found");
 			throw new RuntimeException("Location with id " + id + " not found.");
 		}
 		currentSession.remove(loc);

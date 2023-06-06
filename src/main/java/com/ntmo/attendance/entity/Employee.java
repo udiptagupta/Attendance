@@ -63,5 +63,10 @@ public class Employee {
 	public void setRemark(String remarks) {
 		this.remarks = remarks;
 	}
+	@Override
+	public String toString() {
+		return "Employee [employeeName=" + employeeName + ", employeeMail=" + employeeMail
+				+ ", locationId=" + locationId + ", managerId=" + managerId + ", remarks=" + remarks + "]";
+	}
 	
 }
