@@ -102,9 +102,12 @@ public class AttendanceController {
 		endDate.setMinutes(59);
 		endDate.setSeconds(59);
 		List<Attendance> aList = aRep.findByEmployeeIdAndPresenceDateBetween(id, startDate, endDate);
+		Employee emp = empService.get(id);
 		
 		EmployeeAttendance ea = new EmployeeAttendance();
 		ea.setEmployeeId(id);
+		ea.setEmployeeName(emp.getEmployeeName());
+		ea.setRemarks(emp.getRemarks());
 		List<Date> list = new ArrayList<Date>();
 		
 		for(Attendance att: aList) {

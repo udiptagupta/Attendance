@@ -102,6 +102,8 @@ public class AttendanceReport {
 		for (Employee emp : filteredList) {
 			EmployeeAttendance ea = new EmployeeAttendance();
 			ea.setEmployeeId(emp.getId());
+			ea.setEmployeeName(emp.getEmployeeName());
+			ea.setRemarks(emp.getRemarks());
 			List<Attendance> aList = aRep.findByEmployeeIdAndPresenceDateBetween(emp.getId(), startDate, endDate);
 			List<Date> ad = new ArrayList<Date>();
 			if(aList.size() > 0) {
@@ -197,7 +199,7 @@ public class AttendanceReport {
 			List<Date> lDate = getListOfDate(sDate, 14);
 			for(Date d: lDate) {
 				if(d.getDay() == 0 || d.getDay() == 6) {
-					log.debug("Day: " + d.getDay());
+					// Skip for Sunday-0 and Saturday-6
 					continue;
 				}
 				cell = row.createCell(columnCount++);
@@ -207,6 +209,10 @@ public class AttendanceReport {
 			
 			cell = row.createCell(columnCount++);
 			cell.setCellValue("14 Day Total");
+			cell.setCellStyle(headerStyle);
+			
+			cell = row.createCell(columnCount++);
+			cell.setCellValue("Remarks");
 			cell.setCellStyle(headerStyle);
 			
 			// Print row with days
@@ -230,15 +236,18 @@ public class AttendanceReport {
 			cell.setBlank();
 			cell.setCellStyle(centerAlign);
 			
+			cell = row.createCell(columnCount++);
+			cell.setBlank();
+			cell.setCellStyle(leftAlign);
+			
 			// Print individual Employee's data
 			for(EmployeeAttendance ea : eaList) {
 				row = sheet.createRow(rowCount++);
 				columnCount = 0;
 				int _count = 0;
-				String empName = empService.get(ea.getEmployeeId()).getEmployeeName();
 				
 				cell = row.createCell(columnCount++);
-				cell.setCellValue(empName);
+				cell.setCellValue(ea.getEmployeeName()); 
 				cell.setCellStyle(leftAlign);
 				
 				for(Date d: lDate) {
@@ -259,10 +268,15 @@ public class AttendanceReport {
 				cell.setCellValue(_count);
 				cell.setCellStyle(centerAlign);
 				
+				cell = row.createCell(columnCount++);
+				cell.setCellValue(ea.getRemarks());
+				cell.setCellStyle(leftAlign);
+				
 			}
 			
-			sheet.autoSizeColumn(0);
-			sheet.autoSizeColumn(11);
+			sheet.autoSizeColumn(0);	// Name
+			sheet.autoSizeColumn(11);	// Total
+			sheet.autoSizeColumn(12);	// Remarks
 			
 			try (FileOutputStream outputStream = new FileOutputStream(reportName)) {
 				workbook.write(outputStream);
