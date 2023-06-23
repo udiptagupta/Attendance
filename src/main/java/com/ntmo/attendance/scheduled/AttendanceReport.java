@@ -2,6 +2,7 @@ package com.ntmo.attendance.scheduled;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
@@ -24,6 +25,7 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 
@@ -34,6 +36,7 @@ import com.ntmo.attendance.entity.Manager;
 import com.ntmo.attendance.repos.AttendanceRepository;
 import com.ntmo.attendance.service.EmployeeService;
 import com.ntmo.attendance.service.ManagerService;
+import com.ntmo.attendance.util.SendEmailUtil;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -51,14 +54,18 @@ public class AttendanceReport {
 	@Autowired 
 	private AttendanceRepository aRep;
 	
+	@Autowired
+	private JavaMailSender javaMailSender;
+	
 	private static String[] monthName = {"Jan", "Feb", "March", "April", "May", "June", "July", "Aug", "Sep", "Oct", "Nov", "Dec"};
 	
 	private static String[] days = {"Sun", "Mon", "Tues", "Wed", "Thurs", "Fri", "Sat"};
 
-	@Scheduled(fixedRate = 300000)
+	@Scheduled(fixedRate = 3600000)
 	public void scheduleFixedRateTask() {
 	    
-	    log.info("AttendanceReport: scheduleFixedRateTask - ");
+		Calendar now = Calendar.getInstance();
+	    log.info("AttendanceReport: scheduleFixedRateTask - " + now.toString());
 	    // weeklyReport();
 	}
 	
@@ -153,15 +160,16 @@ public class AttendanceReport {
 	}
 	
 	@SuppressWarnings("deprecation")
-	private void generateReport(Date sDate, Date eDate, Manager mgr, List<EmployeeAttendance> eaList) throws IOException {
+	private String generateReport(Date sDate, Date eDate, Manager mgr, List<EmployeeAttendance> eaList) throws IOException {
 
 		if(eaList.isEmpty()) {
 			log.debug("No reportees for manager - " + mgr.getName());
-			return;
+			return null;
 		}
 
-		String reportName = "Attendance_" + mgr.getId() + "_" + (eDate.getYear() + 1900) + String.format("%02d", eDate.getMonth() + 1) + String.format("%02d", eDate.getDate()) + ".xlsx";
-		log.debug("Generating report - " + reportName);
+		SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");
+		String reportName = "Attendance_" + mgr.getId() + "_" + df.format(eDate) + ".xlsx";
+		log.debug("Generating report - " + reportName + " on " + eDate);
 		
 		try (XSSFWorkbook workbook = new XSSFWorkbook()) {
 			XSSFSheet sheet = workbook.createSheet(monthName[sDate.getMonth()]);
@@ -282,6 +290,8 @@ public class AttendanceReport {
 				workbook.write(outputStream);
 			}
 		}
+		
+		return reportName;
 	}
 	
 	// Report running daily at 10 am, 2 pm and 6 pm
@@ -303,26 +313,42 @@ public class AttendanceReport {
 	@Scheduled(cron = "0 0 19 * * FRI")
 	public void weeklyReport() {
 	 
-	    Date today = Date.from(LocalDate.now().atTime(23, 59, 59).toInstant(ZoneOffset.UTC));
+	    Date today = Date.from(LocalDate.now().atTime(18, 29, 59).toInstant(ZoneOffset.UTC));	// 5h30m difference from UTC
 	    
 	    int numOfDays = today.getDay() + 14;
 	    Date startDate =  Date.from(LocalDate.now().minusDays(numOfDays).atStartOfDay().toInstant(ZoneOffset.UTC));
+	    Date endDate = Date.from(LocalDate.now().minusDays(today.getDay()).atStartOfDay().toInstant(ZoneOffset.UTC));
 	    
 	    log.info("AttendanceReport: weeklyReport - " + startDate.toString() + " and " + today.toLocaleString());
 
 	    List<Manager> managers = mgrService.get();
 	    
 	    for(Manager mgr : managers) {
-	    	List<EmployeeAttendance> eaList = getAttendanceByManager(mgr, numOfDays);
-	    		log.info("Manager [" + mgr.getName() + "]: " + eaList);
-	    	try {
-	    		generateReport(startDate, today, mgr, eaList);
-	    	} catch (IOException ioe) {
-	    		log.error(ioe.toString());
-	    		ioe.printStackTrace();
-	    	} catch (Exception ex) {
-	    		log.error(ex.toString());
-	    		ex.printStackTrace();
+	    	if(mgr.isWeeklyReport()) {
+		    	List<EmployeeAttendance> eaList = getAttendanceByManager(mgr, numOfDays);
+		    		log.info("Manager [" + mgr.getName() + "]: " + eaList);
+		    	try {
+		    		String report = generateReport(startDate, today, mgr, eaList);
+		    		SendEmailUtil mailUtil = new SendEmailUtil();
+		    		mailUtil.setJavaMailSender(javaMailSender);
+		    		mailUtil.setToAddress(mgr.getName());
+		    		SimpleDateFormat df = new SimpleDateFormat("mm/dd");
+		    		mailUtil.setSubject("Attendance report for week ending " + df.format(endDate));
+		    		String message = "PFA attendance report for week ending " + df.format(endDate) + 
+		    				".\r\n\r\nThanks,\r\nTeamO";
+		    		mailUtil.setMessage(message);
+		    		mailUtil.setAttachmentName(report);
+		    		mailUtil.sendEmail();
+		    		
+		    	} catch (IOException ioe) {
+		    		log.error(ioe.toString());
+		    		ioe.printStackTrace();
+		    	} catch (Exception ex) {
+		    		log.error(ex.toString());
+		    		ex.printStackTrace();
+		    	}
+	    	} else {
+	    		log.info("Manager " + mgr.getName() + " doesn't want weekly report");
 	    	}
 	    }
 	}

@@ -12,6 +12,7 @@ public class Manager {
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private int id;
 	private String name;
+	private boolean weeklyReport;
 	
 	public int getId() {
 		return id;
@@ -25,8 +26,15 @@ public class Manager {
 	public void setName(String name) {
 		this.name = name;
 	}
+	public boolean isWeeklyReport() {
+		return weeklyReport;
+	}
+	public void setWeeklyReport(boolean weeklyReport) {
+		this.weeklyReport = weeklyReport;
+	}
 	@Override
 	public String toString() {
-		return "Manager [id=" + id + ", email=" + name + "]";
+		return "Manager [id=" + id + ", name=" + name + ", weeklyReport=" + weeklyReport + "]";
 	}
+	
 }
