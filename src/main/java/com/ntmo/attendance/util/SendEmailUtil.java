@@ -84,13 +84,13 @@ public class SendEmailUtil {
 
 		// true = multipart message
         MimeMessageHelper helper = new MimeMessageHelper(msg, true);
-        helper.setTo("udigupta@in.ibm.com");
-        // helper.setTo(this.getToAddress());
+        // helper.setTo("udigupta@in.ibm.com");
+        helper.setTo(this.getToAddress());
         helper.setSubject(this.getSubject());
         helper.setText(this.getMessage());
 	
         FileSystemResource file = new FileSystemResource(new File(this.getAttachmentName()));
-        helper.addAttachment(file.getFilename(), file);
+        helper.addAttachment(reportName, file);
 
 		log.debug("Sending report " + reportName + " to " + this.getToAddress());
         javaMailSender.send(msg);

@@ -1,7 +1,9 @@
 package com.ntmo.attendance.scheduled;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
@@ -64,8 +66,7 @@ public class AttendanceReport {
 	@Scheduled(fixedRate = 3600000)
 	public void scheduleFixedRateTask() {
 	    
-		Calendar now = Calendar.getInstance();
-	    log.info("AttendanceReport: scheduleFixedRateTask - " + now.toString());
+	    log.info("AttendanceReport: scheduleFixedRateTask - ");
 	    // weeklyReport();
 	}
 	
@@ -314,12 +315,12 @@ public class AttendanceReport {
 	public void weeklyReport() {
 	 
 	    Date today = Date.from(LocalDate.now().atTime(18, 29, 59).toInstant(ZoneOffset.UTC));	// 5h30m difference from UTC
-	    
-	    int numOfDays = today.getDay() + 14;
+	    SimpleDateFormat df = new SimpleDateFormat("MM/dd/yyyy");
+	    int numOfDays = today.getDay() + 7;
 	    Date startDate =  Date.from(LocalDate.now().minusDays(numOfDays).atStartOfDay().toInstant(ZoneOffset.UTC));
-	    Date endDate = Date.from(LocalDate.now().minusDays(today.getDay()).atStartOfDay().toInstant(ZoneOffset.UTC));
+	    //Date endDate = Date.from(LocalDate.now().minusDays(today.getDay()).atStartOfDay().toInstant(ZoneOffset.UTC));
 	    
-	    log.info("AttendanceReport: weeklyReport - " + startDate.toString() + " and " + today.toLocaleString());
+	    log.info("AttendanceReport: weeklyReport - " + df.format(startDate) + " and " + df.format(today));
 
 	    List<Manager> managers = mgrService.get();
 	    
@@ -332,14 +333,18 @@ public class AttendanceReport {
 		    		SendEmailUtil mailUtil = new SendEmailUtil();
 		    		mailUtil.setJavaMailSender(javaMailSender);
 		    		mailUtil.setToAddress(mgr.getName());
-		    		SimpleDateFormat df = new SimpleDateFormat("mm/dd");
-		    		mailUtil.setSubject("Attendance report for week ending " + df.format(endDate));
-		    		String message = "PFA attendance report for week ending " + df.format(endDate) + 
+		    		mailUtil.setFromAddress("TeamO");
+		    		df = new SimpleDateFormat("MM/dd");
+		    		mailUtil.setSubject("WFO report for week ending " + df.format(today));
+		    		String message = "PFA WFO report for week ending " + df.format(today) + 
 		    				".\r\n\r\nThanks,\r\nTeamO";
 		    		mailUtil.setMessage(message);
 		    		mailUtil.setAttachmentName(report);
 		    		mailUtil.sendEmail();
 		    		
+		    		// Delete the generated excel report
+		    		File file = new File(report);
+		    		Files.deleteIfExists(file.toPath());
 		    	} catch (IOException ioe) {
 		    		log.error(ioe.toString());
 		    		ioe.printStackTrace();
